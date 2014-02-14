@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>HTML5 Storage - jsFiddle demo</title>
+  
+  <script type='text/javascript' src='jquery-1.9.1.js'></script>
+  <link rel="stylesheet" type="text/css" href="normalize.css">
+  
+  
+  <script type="text/javascript" src="http://code.jquery.com/mobile/1.3.0-beta.1/jquery.mobile-1.3.0-beta.1.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://code.jquery.com/mobile/1.3.0-beta.1/jquery.mobile-1.3.0-beta.1.css">
+  
+  <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+  
+  <style type='text/css'>
+    #map{
+    width: 200px;
+    height: 200px;
+}
+
+body {
+    margin:20px;
+}
+h1 {
+    font-size: 2em;
+}
+
+h1:hover {
+    cursor: pointer;
+    color: #f00;
+}
+
+h1:active {
+    color:#555;
+}
+
+#write {
+    font-size: 2em;
+    color: #ff8800;
+}
+input {
+    outline: none;
+}
+
+  </style>
+  
+</head>
+<body>
+  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+
+<div data-role="page" id="page1">
+<input type="hidden" id="fore">
+
+
+<div id="map"></div>
+<input type="text" placeholder="Your location" id="inputString" />
+    <a href="#"><h3 onclick="clearStorage()">Forget your location</h3></a>
+    <a href="#"><h3 onclick="saveStatusLocally()">Remember your location</h3></a>
+    <hr/>
+    <h1 onclick="forecast()"><b><a href="#">Your local weather report</a></b></h1>
+<div id="write"></div>
+
+  
+
+
+<script type='text/javascript'>//<![CDATA[ 
+
+var myLong;
+var myLat;    
+var map;
+var elevator;
+var iAmHere;    
+var myOptions = {
+    zoom: 6,
+    mapTypeId: 'terrain'
+};
+map = new google.maps.Map($('#map')[0], myOptions);
+var markers = [];
+
+ // Try HTML5 geolocation
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+      iAmHere = position.coords.latitude+","+position.coords.longitude;
+      document.getElementById('inputString').value = iAmHere;
+        //alert(document.getElementById('fore').value);
+      var infowindow = new google.maps.InfoWindow({
+        map: map,
+        position: pos
+      });
+      marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          title: 'You are here!'
+      });
+        
+      map.setCenter(pos);
+    }, function() {
+      handleNoGeolocation(true);
+    });
+  } else {
+    // Browser doesn't support Geolocation
+    handleNoGeolocation(false);
+  }
+
+
+
+//array to store values
+var stores = Array();
+//input field text
+var inputField = document.getElementById('inputString');
+
+var returnMsg;
+
+//clear the storage
+function clearStorage() {
+    //clear the storage
+    stores = Array();
+    localStorage.clear("database");
+    //visually cleared
+    document.getElementById('write').innerHTML = "no location";
+}
+
+// save the string
+function saveStatusLocally() {
+
+    //grab the value of the text box
+    //var stringToSave = returnMsg;
+    var stringToSave = inputField.value;    
+
+    if ((stringToSave == null) || (stringToSave == "")) {
+        document.getElementById('write').innerHTML = "nothing to store.";
+    } else {
+        //push that value to the array
+        stores.push(stringToSave);
+        //clear the input field for visual 
+        inputField.value = "";
+        //print that value into the local storage named database and joing by a non-breaking space
+        window.localStorage.setItem("database", stores.join(" "));
+        //confirm write
+        document.getElementById('write').innerHTML = stringToSave;
+        //clear message after 1s
+        setTimeout(function() {
+            document.getElementById('write').innerHTML = "";
+        }, 1000);
+
+    }
+}
+
+// read the string
+function readStatus() {
+    //print the value of the local storage "database" key
+    if (window.localStorage.getItem("database") == null) {
+        document.getElementById('write').innerHtml = "nothing stored.";        
+    } else {
+        document.getElementById('write').innerHtml = window.localStorage.getItem("database");
+    }
+}
+function forecast() {
+
+ $.ajax({
+       type: 'GET',
+        url: 'http://api.wunderground.com/api/36b799dc821d5836/conditions/q/'+window.localStorage.getItem("database")+'.json',
+        async: false,
+        contentType: "application/json",
+        dataType: 'jsonp'
+       
+    }).then(function(data) {
+     
+     $.each(data, function(idx, obj) {
+	 returnMsg = "<img src="+obj.icon_url+">"+" Your current weather is "  +obj.temp_f + " degrees and " + obj.weather;
+    if (window.localStorage.getItem("database") == null) {
+        document.getElementById('write').innerHtml = "nothing stored.";        
+    } else {
+        document.getElementById('write').innerHTML = returnMsg;             
+    }    
+});
+    });
+
+
+}
+
+
+
+
+
+
+//]]>  
+
+</script>
+
+
+</body>
+
+
+</html>
+
