@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>HTML5 Storage - jsFiddle demo</title>
+  
+  <script type='text/javascript' src='jquery-1.9.1.js'></script>
+  <link rel="stylesheet" type="text/css" href="normalize.css">
+  
+  
+  <script type="text/javascript" src="http://code.jquery.com/mobile/1.3.0-beta.1/jquery.mobile-1.3.0-beta.1.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://code.jquery.com/mobile/1.3.0-beta.1/jquery.mobile-1.3.0-beta.1.css">
+  
+
+  
+  <style type='text/css'>
+    video {
+    width: 500px; 
+    display: block;
+}
+ html, body, #map-canvas {
+        height: 300px;
+        margin: 0px;
+        padding: 0px
+      }
+  </style>
+  
+</head>
+<body>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+
+
+
+<div data-role="page" id="HomePage" >
+ <div data-role="header" data-theme="b">
+          <h1>Lab 2</h1>
+     </div>
+    <hr/>    
+
+    <div data-role="content" data-theme="a">
+    
+        <button id="show">Show video</button>
+        <div id="vid">
+            <video autobuffer controls autplay >
+                <source id="webm" src="http://giant.gfycat.com/KeyPreciousEuropeanfiresalamander.webm" type="video/webm" >
+            </video>
+       </div>    
+        <button id="hide">Hide video</button>     
+                          
+            
+ <input id="pac-input" class="controls" type="text"
+        placeholder="Enter a location">
+
+
+
+<button data-inline="true" data-theme="b" id="circle">Draw a Circle</button>
+
+    <canvas id="myCanvas" width="300" height="200"></canvas>
+            
+          <div id="map-canvas"></div>            
+            
+           
+         
+    </div>
+          
+<div data-role="footer" data-theme="c"> 
+    <center>UMKC 2014</center>
+        </div>        
+</div>    
+    
+
+
+  
+  
+
+
+<script type='text/javascript'>//<![CDATA[ 
+
+var vidId = document.getElementById(show);
+
+    $(document).ready(function () {
+        $("#vid").hide();
+          
+    $("#show").click(function () {
+        $("#vid").show();
+        
+    });      
+
+        
+    $("#circle").click(function () {
+
+var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+      var radius = 70;
+
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+      context.fillStyle = 'red';
+      context.fill();
+      context.lineWidth = 5;
+      context.strokeStyle = '#003300';
+      context.stroke();        
+    });              
+        
+    $("#hide").click(function () {
+        $("#vid").hide();
+     
+    });          
+
+function initialize() {
+  var mapOptions = {
+    center: new google.maps.LatLng(39,-94),
+    zoom: 13
+  };
+  var map = new google.maps.Map(document.getElementById('map-canvas'),
+    mapOptions);
+
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('pac-input'));
+
+  var types = document.getElementById('type-selector');
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
+
+  var autocomplete = new google.maps.places.Autocomplete(input);
+  autocomplete.bindTo('bounds', map);
+
+  var infowindow = new google.maps.InfoWindow();
+  var marker = new google.maps.Marker({
+    map: map
+  });
+
+  google.maps.event.addListener(autocomplete, 'place_changed', function() {
+    infowindow.close();
+    marker.setVisible(false);
+    var place = autocomplete.getPlace();
+    if (!place.geometry) {
+      return;
+    }
+
+    // If the place has a geometry, then present it on a map.
+    if (place.geometry.viewport) {
+      map.fitBounds(place.geometry.viewport);
+    } else {
+      map.setCenter(place.geometry.location);
+      map.setZoom(15);  
+    }
+    marker.setIcon(/** @type {google.maps.Icon} */({
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(35, 35)
+    }));
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+
+    var address = '';
+    if (place.address_components) {
+      address = [
+        (place.address_components[0] && place.address_components[0].short_name || ''),
+        (place.address_components[1] && place.address_components[1].short_name || ''),
+        (place.address_components[2] && place.address_components[2].short_name || '')
+      ].join(' ');
+    }
+
+    infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+    infowindow.open(map, marker);
+  });
+
+  // Sets a listener on a radio button to change the filter type on Places
+  // Autocomplete.
+  function setupClickListener(id, types) {
+    var radioButton = document.getElementById(id);
+    google.maps.event.addDomListener(radioButton, 'click', function() {
+      autocomplete.setTypes(types);
+    });
+  }
+
+  setupClickListener('changetype-all', []);
+  setupClickListener('changetype-establishment', ['establishment']);
+  setupClickListener('changetype-geocode', ['geocode']);
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+});          
+
+
+
+
+//]]>  
+
+</script>
+
+
+</body>
+
+
+</html>
+
