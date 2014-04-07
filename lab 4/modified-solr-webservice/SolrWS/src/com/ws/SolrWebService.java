@@ -42,15 +42,15 @@ public class SolrWebService {
 
     @GET
     @Produces("application/x-javascript")
-    @Path("crimeId/{crimeId}")
-    public String queryId(@QueryParam("callback") String callback,@PathParam("crimeId") String crimeId){
+    @Path("queryId/{player}")
+    public String queryId(@QueryParam("callback") String callback,@PathParam("player") String player){
         
     	  String line="";
       	
       	try
       	{
 
-      	Process process = Runtime.getRuntime().exec ("curl localhost:8983/solr/collection1_shard1_replica1/select?q=title%3A"+crimeId+"&wt=json");
+      	Process process = Runtime.getRuntime().exec ("curl http://134.193.136.127:8983/solr/collection1_shard1_replica1/select?q=id%3A"+player+"&wt=json");
       	InputStreamReader ir=new InputStreamReader(process.getInputStream());
 
       	LineNumberReader input = new LineNumberReader (ir);
@@ -68,39 +68,7 @@ public class SolrWebService {
       	
     }
     
-    
-    
-    
-    
-    @GET
-    @Produces("application/x-javascript")
-    @Path("uploadJson2Solr/{jsonfile:.+}")
-    public String uploadJson2Solr(@QueryParam("callback") String callback,@PathParam("jsonfile") String jsonfile){
         
-    	  String line="";
-      	
-      	try
-      	{
-
-      	Process process = Runtime.getRuntime().exec ("curl localhost:8983/solr/collection1_shard1_replica1/update/json?commit=true --data-binary @"+jsonfile+" -H Content-type:application/json");
-      	InputStreamReader ir=new InputStreamReader(process.getInputStream());
-      	 LineNumberReader input = new LineNumberReader (ir);
-      	 
-      	 while ((line = input.readLine ()) != null){
-      	  System.out.println(line);
-      	   line = line+"\n";
-         	return line;   	
-      	}
-      	
-      	}
-      	catch (java.io.IOException e){
-      	 System.err.println ("IOException " + e.getMessage());
-      	 return "IOException " + e.getMessage();
-      	}
-      	
-      	return line;   	
-    }
-
     /**
      * PUT method for updating or creating an instance of SolrWebService
      * @param content representation for the resource
